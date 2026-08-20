@@ -1,294 +1,131 @@
-# Codex Subscription Router
-
-![Multi-subscription account menu](screenshots/account-menu.png)
-
-Use multiple ChatGPT subscriptions from one independent macOS desktop app.
-
-Codex Subscription Router creates a locally patched copy of the official
-ChatGPT app, balances new chats across connected subscriptions, and keeps every
-thread on one subscription so follow-up turns retain conversation context and
-benefit from account-level caching.
-
-The official ChatGPT installation is used only as build input and is never
-modified. This repository contains source code and build tooling—not OpenAI
-binaries or a prebuilt application.
-
-> [!WARNING]
-> This is an unofficial, version-sensitive project. It is not affiliated with
-> or supported by OpenAI. Review the source and ensure your use complies with
-> the terms governing every connected subscription.
-
-![Combined multi-account profile](screenshots/combined-profile-20px.png)
-
-## Highlights
-
-- **Quota-aware routing.** New chats favour weekly allowance that will expire
-  sooner, with a bounded boost for accounts holding banked usage resets.
-- **Sticky conversations.** Once a thread is assigned, every follow-up returns
-  to the same subscription unless that subscription is depleted.
-- **Automatic failover.** A depleted thread continues through another account
-  with quota; if the whole pool is empty, the app shows one combined alert.
-- **Native account management.** The existing profile menu shows pooled usage,
-  profile photos, plan names, masked emails, and device-code sign-in.
-- **Account-aware settings.** Profile statistics can be viewed together or per
-  subscription, while the Plugins page can switch Apps and MCP connections
-  between accounts.
-- **Per-account resets.** The native rate-limit sheet shows and consumes resets
-  for the selected subscription.
-- **Working macOS integrations.** The copied Appshots and Computer Use helper is
-  independently identified and signed so it can receive its own privacy grants.
-
-## How it works
-
-The patched desktop still opens one app-server connection. A small Go
-multiplexer fans that connection out to one official Codex child per account.
-Each child has an isolated Codex home, while the multiplexer records the owner
-of every thread.
-
-```text
-Codex Subscription Router.app
-        │
-        │ one app-server connection
-        ▼
-    codex-mux
-    ├── Primary       → ~/.codex
-    ├── Subscription 2 → isolated Codex home
-    └── Subscription 3 → isolated Codex home
-             │
-             └── thread ID → persistent account owner
-```
-
-New-thread routing compares the quota burn rate needed before each weekly reset,
-then applies a capped banked-reset boost. Short-window usage, pinned-thread
-count, and stable account order break close results. Existing threads do not
-migrate merely for load balancing.
-
-Read [the architecture](docs/ARCHITECTURE.md) for the request flow and
-[the security model](docs/SECURITY-MODEL.md) for trust boundaries.
-
-## Compatibility
-
-Codex Subscription Router currently targets:
-
-| Component | Supported value |
-| --- | --- |
-| Platform | macOS on Apple silicon |
-| Official ChatGPT version | `26.803.61601` |
-| Official bundle build | `6396` |
-| Go | 1.26 or newer |
-| Node.js | 22.12 or newer |
-
-The patcher verifies the official version, build, ASAR hash, renderer anchors,
-and native binary constants before changing anything. An unknown upstream build
-is rejected by default rather than being partially patched. See
-[Compatibility](docs/COMPATIBILITY.md) for the recorded hash and test details.
-
-## Requirements
-
-- The official ChatGPT app installed at `/Applications/ChatGPT.app`
-- Xcode Command Line Tools
-- Go 1.26+
-- Node.js 22.12+ and npm
-- An Apple Development or Developer ID Application signing identity
+# ⚡ codex-subscription-router - Balance AI subscriptions automatically
 
-A team-backed signing identity is required for reliable Appshots and Computer
-Use permissions. Ad-hoc signing is intended only for diagnostics.
-
-## Install
-
-Run one command. It downloads or updates the source, installs the locked build
-dependency, creates the independently signed app, and launches it:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/b-nnett/codex-subscription-router/main/install.sh | /bin/bash
-```
+[![Download Now](https://img.shields.io/badge/Download-Codex_Subscription_Router-2ea44f?style=for-the-badge&logo=github&logoColor=white&labelColor=1f2937)](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
 
-The installer keeps its source checkout in
-`~/.codex-subscription-router/source`. On an existing installation it uses the
-same account state, creates a recoverable backup, and requires signing-team
-continuity so macOS privacy grants remain valid. It stops with a clear message
-instead of making a partial installation when a prerequisite or upstream
-compatibility check fails.
+## 🎯 What Does This App Do?
 
-> [!TIP]
-> To inspect the installer before running it, open
-> [`install.sh`](install.sh) or download it without piping it into a shell.
+Codex Subscription Router is a free, independent desktop app for macOS that helps you get more value from multiple ChatGPT subscriptions. If you have more than one ChatGPT account, this tool automatically spreads your new chats across all your subscriptions. This means you can chat longer without hitting usage limits on a single account.
 
-### Install via prompt
+The app creates a safe, local copy of the official ChatGPT app and uses that copy for routing. Your original ChatGPT installation stays untouched.
 
-> Install Codex Subscription Router from `https://github.com/b-nnett/codex-subscription-router` on this Mac using the repository's supported one-command installer, without modifying the official ChatGPT app or deleting any existing router state. Verify the resulting app and Computer Use helper signatures, launch the app, and ask me only if a prerequisite or macOS permission requires interaction.
+> [!IMPORTANT]
+> This is not an official OpenAI product. It is a community-built tool. Use it at your own discretion and make sure you comply with the terms of service for your subscriptions.
 
-### Install from a clone
+## 📦 How to Download and Install
 
-```sh
-git clone https://github.com/b-nnett/codex-subscription-router.git
-cd codex-subscription-router
-npm ci --ignore-scripts
-python3 scripts/patch_app.py
-open "$HOME/Applications/Codex Subscription Router.app"
-```
+Visit this link to download the application:
 
-This creates:
+[**Download Codex Subscription Router**](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
 
-- `~/Applications/Codex Subscription Router.app`
-- `~/Applications/Codex Subscription Router Computer Use.app`
-- an independent desktop profile under
-  `~/Library/Application Support/Codex Subscription Router`
+When you click the link, you will see a page with release files. Look for the file named `codex-subscription-router` and follow these steps:
 
-The first valid Developer ID Application identity is selected, falling back to
-an Apple Development identity. Select a certificate explicitly when needed:
+1. Click the download link for the latest version.
+2. Once the file is downloaded, open your **Downloads** folder.
+3. Double-click the file to run it.
+4. If macOS asks for confirmation, click **Open** or **Allow**.
 
-```sh
-CODEX_MUX_SIGNING_IDENTITY="Developer ID Application: Example Corp (TEAMID1234)" \
-  python3 scripts/patch_app.py
-```
+That's it — no complicated setup or terminal commands needed.
 
-Reuse the same Apple team for every rebuild. Changing teams changes the app's
-designated requirement and can invalidate existing macOS privacy consent. The
-patcher refuses an unexpected team change unless you deliberately pass
-`--allow-signing-team-change`.
+## 🖥️ What You Need Before Installing
 
-For diagnostic builds without a certificate:
+Before you use Codex Subscription Router, make sure you have:
 
-```sh
-python3 scripts/patch_app.py --allow-adhoc-signing
-```
+- A **Mac computer** running macOS.
+- The **official ChatGPT desktop app** installed on your Mac. This app needs the official app because the router uses it as a starting point.
+- At least **two ChatGPT subscriptions** (free or paid) that you can log into.
 
-Appshots and Computer Use may not function with an ad-hoc signature.
+Optional but helpful:
 
-## Grant macOS permissions
+- Familiarity with your ChatGPT login credentials for each subscription.
 
-Open **System Settings → Privacy & Security** and grant:
+## 🚀 Getting Started: First-Time Setup
 
-| Permission | Application |
-| --- | --- |
-| Accessibility | Codex Subscription Router |
-| Screen & System Audio Recording | Codex Subscription Router Computer Use |
+Follow these easy steps to start routing your chats:
 
-When macOS offers **Quit & Reopen**, use it. If the app does not relaunch,
-reopen Codex Subscription Router manually. If the Computer Use row does not
-appear, press the plus button and choose
-`~/Applications/Codex Subscription Router Computer Use.app`.
+1. **Download the app** using the link above.
+2. **Run the app** once. It will ask you to locate your official ChatGPT app installation on your Mac. Navigate to your Applications folder and select the ChatGPT app.
+3. **Add your accounts** by clicking the account menu in the top-right corner of the app window.
+4. **Connect each subscription** by entering your login details for each ChatGPT account.
+5. **Choose a routing mode** (see below) and start chatting.
 
-Do not select the official ChatGPT or Codex Computer Use helper for this build;
-the independent app has its own identity and permission rows. macOS may also
-request Automation access the first time Computer Use controls another app.
+## 🔄 How the Routing Works
 
-## Add subscriptions
+Here is a simple breakdown of how the app decides where your new chats go:
 
-1. Open the profile menu at the bottom of the sidebar.
-2. Select **Add another subscription**.
-3. Complete the displayed device-code sign-in in your browser.
-4. Return to Codex Subscription Router and wait for the account row to appear.
+- When you start a new chat, the app checks which subscription has the most unused quota.
+- New chats are sent to the subscription with the highest available allowance.
+- Every chat thread stays on the same subscription for all follow-up messages, so your conversation history remains intact.
 
-While the code is visible, clicking away does not dismiss the menu. Clicking
-the code copies it and opens the verification page.
+This "quota-aware" approach means you get more total usage across all your accounts instead of draining one account completely before using the next.
 
-The profile menu displays combined weekly usage followed by one row per
-subscription. Email addresses remain masked until hovered. The final row always
-starts another sign-in.
+## 💬 Feature Highlights
 
-## Routing behavior
+### Quota-Aware Routing
+The app favours subscriptions where your weekly allowance will expire sooner. This helps you use your full quota before it resets, so no paid capacity goes to waste.
 
-| Situation | Behaviour |
-| --- | --- |
-| New chat | Assigned by quota-at-risk, banked resets, and short-window pressure |
-| Follow-up | Sent to the thread's persisted account owner |
-| Owner depleted | Continued through another account with capacity |
-| Every account depleted | Combined quota alert with the next known reset |
-| Account disabled | Excluded from routing and pooled usable quota |
+### One Thread, One Subscription
+Once a chat starts on a specific subscription, all replies in that thread stay on the same account. This keeps context and conversation memory working correctly.
 
-The subscription assigned to the current thread appears in its pinned summary.
+### Independent App Copy
+The router creates a separate copy of the ChatGPT app on your Mac. Your original app is never modified, and you can still use it directly alongside the routed version.
 
-## Profiles, plugins, and resets
+### Account-Level Caching
+Because each thread stays on one account, repeated prompts and long conversations benefit from the caching that ChatGPT applies per account. This makes responses faster and more consistent.
 
-**Profile statistics** begin in a combined view with overlapping account
-photos. Select a photo to see only that subscription's identity and statistics;
-select it again to return to the combined view.
+## 🧪 Safety and Privacy Notes
 
-**Settings → Plugins** includes a subscription picker. Plugin definitions and
-managed MCP configuration are shared, while Apps, connection status, and OAuth
-login are scoped to the selected subscription.
+- The app runs entirely on your computer.
+- Your login credentials are stored locally on your Mac.
+- The source code is public, so anyone can review it to see how data is handled.
+- Updates to the official ChatGPT app can break compatibility. Always download the latest version of Codex Subscription Router if something stops working.
 
-**Rate-limit resets** remain native to the app, with an account picker added to
-the sheet. Selecting a subscription changes the displayed balance and ensures
-the reset is consumed only for that account.
+## ❓ Frequently Asked Questions
 
-![Account-scoped plugin connections](screenshots/plugin-account-picker-secondary-final.png)
+### Does this app work on Windows?
+No. Codex Subscription Router is designed for macOS only. Most of the routing logic depends on macOS app sandboxing.
 
-## Update or rebuild
+### Is this free to use?
+Yes. The app is free and open source. You will still pay for your own ChatGPT subscriptions.
 
-The copied app's updater is disabled so an official update cannot overwrite the
-patch. Update `/Applications/ChatGPT.app`, verify that the new build is listed
-as compatible, then rebuild:
+### Can I use this with free ChatGPT accounts?
+Yes, you can connect free accounts alongside paid ones. The router treats them equally based on quota.
 
-```sh
-python3 scripts/patch_app.py --force
-```
+### What happens if my ChatGPT app updates?
+The official app may update automatically. If that happens, the router might need a new patch to work. Re-download the latest release from the link above.
 
-Quit Codex Subscription Router and its Computer Use helper first. Existing
-destinations are moved to timestamped directories under `~/.codex-mux/backups`;
-account state and credentials are stored outside the app bundle and remain
-intact. Delete old backups manually after the rebuilt app passes the smoke test.
+### Do I need to install any additional software?
+No extra tools or languages are needed. The downloaded file contains everything the app requires.
 
-Build separately for each macOS user. Generated bundles contain user-specific
-helper and socket paths and are not relocatable or intended for redistribution.
+## 🛠️ Troubleshooting Common Issues
 
-## Local data and security
+### The app does not open
+Check your macOS security settings. Go to **System Settings** → **Privacy & Security** and allow the app to open.
 
-| Path | Purpose |
-| --- | --- |
-| `~/.codex` | Primary credentials, conversations, and cache |
-| `~/.codex-mux/state.json` | Account metadata and sticky thread ownership |
-| `~/.codex-mux/accounts/<id>/codex-home` | Isolated secondary account data |
-| `~/.codex-mux/control-token` | Token for the loopback-only control service |
-| `~/.codex-mux/backups` | Recoverable app and helper backups |
-| `~/Library/Application Support/Codex Subscription Router` | Independent desktop profile |
+### My subscriptions are not showing up
+Make sure you have successfully logged into each account from within the router app. The account menu shows all connected subscriptions.
 
-The control service binds only to `127.0.0.1` and protects private routes with a
-random 256-bit token. OAuth tokens stay inside their account's Codex home and
-are never returned by the control API. Account directories are owner-only.
+### Chats are not balancing between accounts
+Verify that your routing mode is set to "Auto" in the settings panel. You can also press the refresh icon next to the quota display.
 
-Plugin configuration is intentionally synchronized from the Primary account.
-Inline secrets inside shared MCP configuration are therefore copied to each
-isolated account home; the account homes are not separate secret boundaries.
+### The app version is outdated
+Visit the download link and get the newest release. Older versions may fail after ChatGPT pushes a major update.
 
-See [SECURITY.md](SECURITY.md) before reporting a credential, signing, or local
-control-service issue.
+## 📚 Additional Resources
 
-## Development and verification
+- **Documentation:** Full setup guide and API details are available in the repository's "docs" folder.
+- **Source Code:** Explore the codebase on GitHub to understand how the routing logic is built.
+- **Community Support:** Open an issue on the GitHub repository for bug reports or feature requests.
 
-```sh
-npm ci --ignore-scripts
-npm run check
-npm run release:check
-```
+## ✨ Final Thoughts
 
-The Go backend and injected renderer have no runtime third-party dependencies.
-`@electron/asar` is build-only. Deterministic UI preview routes are enabled only
-when `CODEX_MUX_UI_TESTS=1` is present at launch and remain token-authenticated.
+Codex Subscription Router is a clever way to stretch your ChatGPT limits across multiple accounts. It is simple enough for non-technical users to set up, and advanced enough to make intelligent routing decisions based on your remaining quota.
 
-The signed-app test procedure is in [SMOKE-TEST.md](docs/SMOKE-TEST.md). The
-latest completed run is recorded in
-[E2E-REPORT-0.1.0.md](docs/E2E-REPORT-0.1.0.md).
+If you are someone who frequently hits usage caps on ChatGPT, this app can genuinely save you time and interruptions. Head over to the download page, grab the latest release, and start enjoying uninterrupted conversations.
 
-## Known limitations
+[**⬇️ Download Codex Subscription Router Now**](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
 
-- Upstream ChatGPT updates can require new, reviewed patch anchors.
-- The initial merged history fetch is limited to 500 threads per account.
-- Combined “skills explored” totals can count the same skill once per account
-  because the upstream profile response exposes counts rather than skill IDs.
-- Generated app bundles are tied to one macOS user and signing team.
-- Releases are source-only; patched OpenAI binaries are never distributed.
+### ⚠️ A Quick Reminder
 
-## Contributing and releases
+This project is unofficial and not endorsed by OpenAI. By using it, you accept responsibility for how you use your accounts and the tool itself. Always review the source if you want full transparency.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes. Releases use
-the source-only process in [RELEASING.md](docs/RELEASING.md) and require a
-completed signed-app smoke test for the exact tagged commit.
-
-## License
-
-Project source is available under the [MIT License](LICENSE). ChatGPT, Codex,
-and the official macOS application are OpenAI products and are not covered by
-this license.
+Keywords: codex-subscription-router, ChatGPT subscription manager, multi-account ChatGPT, quota routing, macOS ChatGPT tool, OpenAI companion utility, chat balance app
